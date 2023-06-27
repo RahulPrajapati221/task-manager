@@ -1,7 +1,6 @@
-const express = require("express");
-const User = require("../models/User")
-const bcrypt = require("bcryptjs")
-const auth = require("../middleware/auth")
+import express from "express"
+import User from "../models/User.js"
+import {auth} from "../middleware/auth.js"
 const router = new express.Router();
 
 
@@ -111,5 +110,4 @@ router.delete('/user/me',auth, async (req, res) => {
       }
   })
 
-  
-module.exports = router;
+export default router;

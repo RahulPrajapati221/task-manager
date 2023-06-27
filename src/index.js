@@ -1,8 +1,8 @@
-const express = require("express");
+import express from "express"
 const app = express();
-require("./db/database");
-const userRouter = require("./routes/usersRoutes")
-const taskRouter = require("./routes/tasksRoutes")
+import "./db/database.js"
+import userRouter from "./routes/usersRoutes.js"
+import taskRouter from "./routes/tasksRoutes.js"
 
 const port =process.env.PORT || 3000;
 

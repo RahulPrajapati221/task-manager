@@ -1,23 +1,25 @@
-const express = require("express");
-const Task = require("../models/Task")
-const auth = require("../middleware/auth")
+import express from "express"
+import Task from "../models/Task.js"
+import {auth} from "../middleware/auth.js"
 const router = new express.Router();
 
 
 router.get("/tasks", auth, async (req, resp) => {
-    // try {
-      await req.user.populate("task").execPopulate()
-      resp.send(req.user.tasks);
-    // } catch (err) {
-    //   resp.status(500).send(err);
-    // }
+    try {
+      await req.user.populate({
+        path: 'tasks'
+    })
+    resp.send(req.user.tasks)
+    } catch (err) {
+      resp.status(500).send(err);
+    }
   });
   
 router.post("/tasks",auth, async (req, resp) => {
     try {
       const task = await Task.create({
           ...req.body,
-          creater: req.user._id
+          owner_id: req.user._id
       });
       resp.status(201).send(task);
     } catch (err) {
@@ -76,4 +78,4 @@ router.delete('/task/:id', async (req, res) => {
   })
   
   
-module.exports = router;
+  export default router;
