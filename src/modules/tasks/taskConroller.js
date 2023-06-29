@@ -1,71 +1,58 @@
-import { successMess, errorMess, statusCodes } from "../../constant.js";
 import {
-  createT,
-  getT,
-  findById,
-  validTask,
-  upTask,
+  createTask,
+  getTask,
+  findTaskById,
+  updateTaskDetails,
   findUser,
-  delTask,
+  deleteTaskById,
 } from "./task-services.js";
-
-const { success, created, succFound } = successMess;
-const {
-  successCode,
-  createdCode,
-  foundCode,
-  badRequestCode,
-  unauthorizedCode,
-  notFoundCode,
-  serverErrorCode,
-} = statusCodes;
-
-const {
-  emailError,
-  passError,
-  ageError,
-  badRequest,
-  serverError,
-  unauthorized,
-  notFound,
-} = errorMess;
+import {
+  successMess,
+  statusCodes,
+  errorMess,
+  taskMsgs,
+} from "../../constant.js";
+import { validUpdate } from "../../utils/validateUpdate.js";
 
 export const getTasks = async (req, resp) => {
-  const { match, limit, skip, sort } = getT(req.query);
+  const taskGot = getTask(req.query);
+
+  const { match, limit, skip, sort } = taskGot;
+  const user = req.user;
   try {
-    await req.user.populate({
+    await user.populate({
       path: "tasks",
       match,
       options: {
-        limit: limit,
-        skip: skip,
+        limit,
+        skip,
         sort,
       },
     });
-    if (!req.user.task) {
-      throw new Error(notFound);
-    }
+    const userTasks = req.user.tasks;
     resp
-      .status(successCode)
-      .send({ data: req.user.tasks, message: success });
+      .status(statusCodes.successCode)
+      .send({ data: userTasks, message: successMess.success });
   } catch (err) {
-    resp.status(badRequestCode).send(badRequest);
+    resp.status(statusCodes.badRequestCode).send(errorMess.badRequest);
   }
 };
 
 //Create new Task
-export const createTask = async (req, resp) => {
+export const createTasks = async (req, resp) => {
   try {
     const task = {
       ...req.body,
       owner_id: req.user._id,
     };
-    const nTask = await createT(task);
+    const newTask = await createTask(task);
     resp
-      .status(createdCode)
-      .send({ data: nTask, message: created });
+      .status(statusCodes.createdCode)
+      .send({ data: newTask, message: successMess.created });
   } catch (err) {
-    resp.status(badRequestCode).send(badRequest);
+    resp
+      .status(statusCodes.statusCodes.badRequestCode)
+      .send(errorMess.badRequest);
   }
 };
 
@@ -76,49 +63,51 @@ export const findTask = async (req, resp) => {
       _id: req.params.id,
       owner_id: req.user._id,
     };
-    findById(task);
+    const Task = findTaskById(task);
     if (!task) {
-      return resp.status(notFoundCode).send(notFound);
+      return resp
+        .status(statusCodes.notFoundCode)
+        .send(errorMess.notFound(taskMsgs.taskNotfound));
     }
-    resp.send({ data: task, message: succFound });
+    resp.send({ data: Task });
   } catch (err) {
-    resp.status(serverErrorCode).send(serverError);
+    resp.status(statusCodes.serverErrorCode).send(serverError);
   }
 };
 
 //Update Task
 export const updateTask = async (req, resp) => {
   const updates = Object.keys(req.body);
-  const isValidOperation = validTask(updates);
+  const allowedUpdates = ["description", "completed"];
+  const updateField = { updates, allowedUpdates };
+
+  const isValidOperation = validUpdate(updateField);
   if (!isValidOperation) {
-    return resp.status(badRequestCode).send(badRequest);
+    return resp.status(statusCodes.badRequestCode).send(errorMess.badRequest);
   }
   try {
     const _id = req.params.id;
     const task = await findUser(_id, req.user.id);
 
     if (!task) {
-      return resp.status(notFoundCode).send(notFound);
+      return resp
+        .status(statusCodes.notFoundCode)
+        .send(errorMess.notFound(taskMsgs.taskNotfound));
     }
-    const uTask = await upTask(task, updates, req.body);
+    const Task = await updateTaskDetails(task, updates, req.body);
 
-    resp.send({ data: uTask, message: success });
+    resp.send({ data: Task, message: success });
   } catch (e) {
-    resp.status(badRequestCode).send(badRequest);
+    resp.status(statusCodes.badRequestCode).send(errorMess.badRequest);
   }
 };
 
 // Delete Task
 export const deleteTask = async (req, resp) => {
   try {
-    const task = await delTask(req.params.id, req.user._id);
-    if (!task) {
-      resp
-        .status(badRequestCode)
-        .send({ message: badRequest });
-    }
-    resp.status(successCode).send({ data: task, message: success });
+    const task = await deleteTaskById(req.params.id, req.user._id);
+    resp.status(statusCodes.successCode).send({ data: task });
   } catch (err) {
-    resp.status(serverErrorCode).send(serverErrorCode);
+    resp.status(statusCodes.serverErrorCode).send(errorMess.serverError);
   }
 };

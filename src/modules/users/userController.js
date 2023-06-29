@@ -1,134 +1,114 @@
-import {createUser, 
-        findUser, 
-        validUpdate, 
-        upUser, 
-        delUser} from "./user-services.js"
-import { successMess, errorMess, statusCodes } from "../../constant.js";
-
-const {
-  success,
-  succFound,
-  login,
-  Logout,
-  created
-}=successMess;
-
-const {
-  successCode,
-  createdCode,
-  foundCode,
-  badRequestCode,
-  unauthorizedCode,
-  notFoundCode,
-  serverErrorCode,
-} = statusCodes;
-
-const {
-  loginError,
-  badRequest,
-  serverError,
-  unauthorized,
-  notFound,
-} = errorMess;
-
-
+import {
+  createUser,
+  findUser,
+  updateUserById,
+  deleteUserById,
+} from "./user-services.js";
+import { validUpdate } from "../../utils/validateUpdate.js";
+import {
+  successMess,
+  errorMess,
+  statusCodes,
+  userMsgs,
+} from "../../constant.js";
 
 //Register user
- export const registerUser = async (req, resp) => {
+export const registerUser = async (req, resp) => {
   try {
-    const user =await createUser(req.body)
-    resp.status(createdCode)
-    .send({data:user ,message:created});
+    const user = await createUser(req.body);
+    resp
+      .status(statusCodes.createdCode)
+      .send({ data: user, message: successMess.created });
   } catch (err) {
-    resp.status(serverErrorCode)
-    .send(serverError);
+    resp.status(statusCodes.serverErrorCode).send(errorMess.serverError);
   }
-}
+};
 
-// login user
+//User Login
 export const loginUser = async (req, resp) => {
   try {
     const { email, password } = req.body;
     const { user, token } = await findUser(email, password);
-    resp.status(successCode)
-    .send({data: user, token, message: login})
+    resp
+      .status(statusCodes.successCode)
+      .send({ data: user, token, message: successMess.login });
   } catch (err) {
-    resp.status(unauthorizedCode, loginError)
-    .send(badRequest);
+    resp
+      .status(statusCodes.unauthorizedCode, loginError)
+      .send(errorMess.badRequest);
   }
-}
+};
 
 //User profile
 export const userProfile = async (req, resp) => {
-    try {
-      resp.status(foundCode)
-      .send({data:req.user ,message:succFound});
-    } catch (err) {
-      resp.status(serverErrorCode)
-      .send(serverError);
-    }
+  try {
+    resp.status(statusCodes.successCode).send({ data: req.user });
+  } catch (err) {
+    resp.status(statusCodes.serverErrorCode).send(errorMess.serverError);
   }
+};
 
 // logout user
-export const logOutUser =  async (req, resp) => {
+export const logOutUser = async (req, resp) => {
   try {
     req.user.tokens = req.user.tokens.filter((token) => {
       return token.token !== req.token;
     });
     await req.user.save();
-    resp.status(successCode).send({message: success});
+    resp.status(statusCodes.successCode).send({ message: successMess.success });
   } catch (err) {
-    resp.status(serverErrorCode).send(serverError);
+    resp.status(statusCodes.serverErrorCode).send(errorMess.serverError);
   }
-}
+};
 
 // logout user from all sessions
-export const logOutAll =  async (req, resp) => {
+export const logOutAll = async (req, resp) => {
   try {
     req.user.tokens = [];
     await req.user.save();
-    resp.status(successCode)
-    .send({message: `${Logout}`});
+    resp.status(statusCodes.successCode).send({ message: `${Logout}` });
   } catch (err) {
-    resp.status(serverErrorCode)
-    .send(serverError);
+    resp.status(statusCodes.serverErrorCode).send(errorMess.serverError);
   }
-}
-
+};
 
 // update user
-export const updateUser =  async (req, resp) => {
+export const updateUser = async (req, resp) => {
   const updates = Object.keys(req.body);
-  const isValidOperation = validUpdate(updates);
+  const allowedUpdates = ["name", "email", "password", "age"];
+  const updateField = { updates, allowedUpdates };
+
+  const isValidOperation = validUpdate(updateField);
   if (!isValidOperation) {
-    return resp.status(badRequestCode)
-    .send({ message:badRequest });
+    return resp
+      .status(statusCodes.badRequestCode)
+      .send({ message: errorMess.badRequest });
   }
 
   try {
-    const user = req.user
+    const user = req.user;
     if (!user) {
-      return resp.status(badRequestCode)
-      .send(badRequest);
+      return resp
+        .status(statusCodes.notFoundCode)
+        .send(errorMess.notFound(userMsgs.userNotfound));
     }
-    const User = await upUser(updates, user, req.body);
-    resp.status(createdCode)
-    .send({ data: User, message:created});
+    const User = await updateUserById(updates, user, req.body);
+    resp
+      .status(statusCodes.createdCode)
+      .send({ data: User, message: successMess.created });
   } catch (err) {
-    resp.status(serverErrorCode)
-    .send(serverError);
+    resp.status(statusCodes.serverErrorCode).send(errorMess.serverError);
   }
-}
+};
 
 // delete user
 export const deleteUser = async (req, resp) => {
   try {
-    delUser(req.user._id);
-    resp.status(successCode)
-    .send({ data: req.user, message:success });
+    deleteUserById(req.user._id);
+    resp
+      .status(statusCodes.successCode)
+      .send({ data: req.user, message: success });
   } catch (err) {
-    resp.status(serverErrorCode)
-    .send(serverErrorCode);
+    resp.status(statusCodes.serverErrorCode).send(errorMess.serverError);
   }
-}
-
+};
