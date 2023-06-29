@@ -1,12 +1,9 @@
-import mongoose from "mongoose"
-const connectionURL = "mongodb://127.0.0.1:27017/task-manager"
-
+import mongoose from "mongoose";
 
 //Datebase connection
-mongoose.connect(connectionURL).then(()=>{
-    console.log("Database connected")
-}).catch((error)=>{
-    console.log(error)
-})
-
-
+export const connectDB = () => {
+  mongoose
+    .connect(process.env.DB_URI, {useNewUrlParser:true, useUnifiedTopology:true, })
+    .then((data) => console.log(`mongodb connected with server : ${data.connection.host}`))
+    .catch((e) => console.log(e));
+};

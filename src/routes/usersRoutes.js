@@ -1,34 +1,31 @@
 import express from "express";
 import { auth } from "../middleware/auth.js";
-import {createUser, 
+import {registerUser, 
         loginUser, 
         userProfile, 
         logOutUser, 
         logOutAll, 
         updateUser,
-        deleteUser} from "../controller/userController.js" 
+        deleteUser} from "../modules/users/userController.js" 
 const router = new express.Router();
 
 
 //Register user
-router.post("/user", createUser);
+router.post("/register", registerUser);
 
 //User profile
-router.get("/users/me", auth, userProfile);
+router.route("/me").get( auth, userProfile )
+                   .patch( auth, updateUser )
+                   .delete( auth, deleteUser );
 
 // login user
-router.post("/user/login", loginUser);
+router.post("/login", loginUser);
 
 // logout user
-router.post("/user/logout", auth, logOutUser);
+router.post("/logout", auth, logOutUser);
 
 // logout user from all sessions
-router.post("/user/logoutAll", auth,logOutAll);
+router.post("/logoutAll", auth,logOutAll);
 
-// update user
-router.patch("/user/me", auth, updateUser);
-
-// delete user
-router.delete("/user/me", auth, deleteUser);
 
 export default router;
