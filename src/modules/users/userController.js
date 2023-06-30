@@ -66,7 +66,7 @@ export const logOutAll = async (req, resp) => {
   try {
     req.user.tokens = [];
     await req.user.save();
-    resp.status(statusCodes.successCode).send({ message: `${Logout}` });
+    resp.status(statusCodes.successCode).send({ message: successMess.Logout });
   } catch (err) {
     resp.status(statusCodes.serverErrorCode).send(errorMess.serverError);
   }

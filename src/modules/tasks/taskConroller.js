@@ -3,7 +3,6 @@ import {
   getTask,
   findTaskById,
   updateTaskDetails,
-  findUser,
   deleteTaskById,
 } from "./task-services.js";
 import {
@@ -63,7 +62,7 @@ export const findTask = async (req, resp) => {
       _id: req.params.id,
       owner_id: req.user._id,
     };
-    const Task = findTaskById(task);
+    const Task = await findTaskById(task);
     if (!task) {
       return resp
         .status(statusCodes.notFoundCode)
@@ -86,9 +85,11 @@ export const updateTask = async (req, resp) => {
     return resp.status(statusCodes.badRequestCode).send(errorMess.badRequest);
   }
   try {
-    const _id = req.params.id;
-    const task = await findUser(_id, req.user.id);
-
+    const verifyId = {
+      _id: req.params.id,
+      owner_id: req.user._id,
+    };
+    const task = await findTaskById(verifyId);
     if (!task) {
       return resp
         .status(statusCodes.notFoundCode)
@@ -96,7 +97,7 @@ export const updateTask = async (req, resp) => {
     }
     const Task = await updateTaskDetails(task, updates, req.body);
 
-    resp.send({ data: Task, message: success });
+    resp.send({ data: Task, message: successMess.success });
   } catch (e) {
     resp.status(statusCodes.badRequestCode).send(errorMess.badRequest);
   }

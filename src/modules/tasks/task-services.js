@@ -6,7 +6,10 @@ export const createTask = async (taskBody) => {
 };
 
 export const findTaskById = async (taskBody) => {
-  const task = await Task.findOne(taskBody);
+  const task = await Task.findOne({
+    _id: taskBody._id,
+    owner_id: taskBody.owner_id,
+  });
   return task;
 };
 
@@ -25,14 +28,6 @@ export const getTask = (reqQuery) => {
   const limit = parseInt(reqQuery.limit);
   const skip = parseInt(reqQuery.skip);
   return { match, sort, limit, skip };
-};
-
-export const findUser = async (_id, reqUser) => {
-  const task = await Task.findOne({
-    _id: _id,
-    owner_id: reqUser,
-  });
-  return task;
 };
 
 export const updateTaskDetails = async (task, updates, reqBody) => {
