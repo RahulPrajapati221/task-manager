@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../modules/users/user-model.js";
+import { errorMess, constants } from "../constant.js";
 
 export const auth = async (req, resp, next) => {
   try {
@@ -10,12 +11,12 @@ export const auth = async (req, resp, next) => {
       "tokens.token": token,
     });
     if (!user) {
-      throw new Error();
+      throw new Error(errorMess.notFound(constants.user));
     }
     req.token = token;
     req.user = user;
     next();
   } catch (e) {
-    resp.status(401).send({ error: "Please authenticate " });
+    resp.status(401).send({ error: errorMess.unauthorized });
   }
 };

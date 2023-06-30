@@ -25,10 +25,7 @@ export const errorMess = {
   notFound: (value) => `${value} Not found, Please try again.`,
 };
 
-export const taskMsgs = {
-  taskNotfound: "Task",
-};
-
-export const userMsgs = {
-  userNotfound: "User",
+export const constants = {
+  task: "Task",
+  user: "User",
 };

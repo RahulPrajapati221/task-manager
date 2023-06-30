@@ -5,7 +5,7 @@ import {
   findTask,
   updateTask,
   deleteTask,
-} from "../modules/tasks/taskConroller.js";
+} from "../modules/tasks/taskController.js";
 import { auth } from "../middleware/auth.js";
 const router = new express.Router();
 

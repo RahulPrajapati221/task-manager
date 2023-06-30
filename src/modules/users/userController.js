@@ -9,7 +9,7 @@ import {
   successMess,
   errorMess,
   statusCodes,
-  userMsgs,
+  constants,
 } from "../../constant.js";
 
 //Register user
@@ -76,9 +76,8 @@ export const logOutAll = async (req, resp) => {
 export const updateUser = async (req, resp) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ["name", "email", "password", "age"];
-  const updateField = { updates, allowedUpdates };
 
-  const isValidOperation = validUpdate(updateField);
+  const isValidOperation = validUpdate(updates, allowedUpdates);
   if (!isValidOperation) {
     return resp
       .status(statusCodes.badRequestCode)
@@ -90,7 +89,7 @@ export const updateUser = async (req, resp) => {
     if (!user) {
       return resp
         .status(statusCodes.notFoundCode)
-        .send(errorMess.notFound(userMsgs.userNotfound));
+        .send(errorMess.notFound(constants.user));
     }
     const User = await updateUserById(updates, user, req.body);
     resp

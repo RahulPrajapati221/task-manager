@@ -1,6 +1,6 @@
-export function validUpdate(updateField) {
-  const isValidOperation = updateField.updates.every((update) => {
-    return updateField.allowedUpdates.includes(update);
+export function validUpdate(updates, allowedUpdates) {
+  const isValidOperation = updates.every((update) => {
+    return allowedUpdates.includes(update);
   });
   return isValidOperation;
 }

@@ -9,7 +9,7 @@ import {
   successMess,
   statusCodes,
   errorMess,
-  taskMsgs,
+  constants,
 } from "../../constant.js";
 import { validUpdate } from "../../utils/validateUpdate.js";
 
@@ -66,7 +66,7 @@ export const findTask = async (req, resp) => {
     if (!task) {
       return resp
         .status(statusCodes.notFoundCode)
-        .send(errorMess.notFound(taskMsgs.taskNotfound));
+        .send(errorMess.notFound(constants.task));
     }
     resp.send({ data: Task });
   } catch (err) {
@@ -78,9 +78,8 @@ export const findTask = async (req, resp) => {
 export const updateTask = async (req, resp) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ["description", "completed"];
-  const updateField = { updates, allowedUpdates };
 
-  const isValidOperation = validUpdate(updateField);
+  const isValidOperation = validUpdate(updates, allowedUpdates);
   if (!isValidOperation) {
     return resp.status(statusCodes.badRequestCode).send(errorMess.badRequest);
   }
@@ -93,7 +92,7 @@ export const updateTask = async (req, resp) => {
     if (!task) {
       return resp
         .status(statusCodes.notFoundCode)
-        .send(errorMess.notFound(taskMsgs.taskNotfound));
+        .send(errorMess.notFound(constants.task));
     }
     const Task = await updateTaskDetails(task, updates, req.body);
 
